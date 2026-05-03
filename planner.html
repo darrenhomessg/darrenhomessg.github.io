@@ -262,8 +262,8 @@ function del(section, id) {
 }
 
 function add(section) {
-  const inputId = section === 'property' ? 'prop-input' : 'falcon-input';
-  const priId = section === 'property' ? 'prop-pri' : 'falcon-pri';
+  const inputId = section === 'property' ? 'prop-input' : section === 'falcon' ? 'falcon-input' : 'personal-input';
+  const priId = section === 'property' ? 'prop-pri' : section === 'falcon' ? 'falcon-pri' : 'personal-pri';
   const input = document.getElementById(inputId);
   const text = input.value.trim();
   if (!text) return;
