@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Darren — Daily Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.08);
+    --text: #1A1A1A;
+    --muted: #888;
+    --hint: #BBB;
+    --property: #1B4F8A;
+    --property-bg: #EBF2FB;
+    --falcon: #7A4A10;
+    --falcon-bg: #FAF0E0;
+    --high: #C0392B;
+    --high-bg: #FDEDEC;
+    --med: #D68910;
+    --med-bg: #FEF9E7;
+    --low: #1E8449;
+    --low-bg: #EAFAF1;
+    --done-line: #CCC;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page { max-width: 640px; margin: 0 auto; }
+
+  .header { margin-bottom: 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.25rem; }
+  .brand { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); letter-spacing: -0.5px; }
+  .tagline { font-size: 13px; color: var(--muted); }
+  .date-chip { font-size: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; color: var(--muted); white-space: nowrap; }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .stat { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .section { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.25rem; overflow: hidden; }
+
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .section-name { font-size: 15px; font-weight: 500; }
+  .section-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+  .badge-property { background: var(--property-bg); color: var(--property); }
+  .badge-falcon { background: var(--falcon-bg); color: var(--falcon); }
+
+  .task { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+  .task:last-of-type { border-bottom: none; }
+  .task:hover { background: var(--bg); }
+  .task.done .task-text { text-decoration: line-through; color: var(--done-line); }
+  .task.done .priority { opacity: 0.4; }
+
+  .tick { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--hint); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .tick.checked { background: #1A1A1A; border-color: #1A1A1A; }
+  .tick.checked::after { content: ''; display: block; width: 5px; height: 8px; border: 2px solid #FFF; border-top: none; border-left: none; transform: rotate(45deg) translateY(-1px); }
+
+  .task-body { flex: 1; min-width: 0; }
+  .task-text { font-size: 14px; line-height: 1.5; color: var(--text); }
+  .task-tags { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+
+  .priority { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.3px; text-transform: uppercase; }
+  .p-high { background: var(--high-bg); color: var(--high); }
+  .p-med { background: var(--med-bg); color: var(--med); }
+  .p-low { background: var(--low-bg); color: var(--low); }
+
+  .del-btn { font-size: 16px; color: var(--hint); background: none; border: none; cursor: pointer; padding: 0 4px; line-height: 1; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+  .task:hover .del-btn { opacity: 1; }
+
+  .add-area { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+  .add-input { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); outline: none; }
+  .add-input:focus { border-color: #888; }
+  .add-input::placeholder { color: var(--hint); }
+  .add-select { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); outline: none; cursor: pointer; }
+  .add-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 16px; border: 1.5px solid var(--text); border-radius: 8px; background: var(--text); color: #FFF; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+  .add-btn:hover { opacity: 0.8; }
+  .add-btn:active { transform: scale(0.97); }
+
+  .bottom-actions { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
+  .clear-btn { font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    .brand { font-size: 22px; }
+    .stat-num { font-size: 22px; }
+    .add-area { flex-wrap: wrap; }
+    .add-input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="brand">Daily Planner</div>
+        <div class="tagline">Darren Khew — SG Property &amp; Falcon Safe</div>
+      </div>
+      <div class="date-chip" id="todayChip"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
+    <div class="stat"><div class="stat-num" id="statDone">0</div><div class="stat-label">Done</div></div>
+    <div class="stat"><div class="stat-num" id="statLeft">0</div><div class="stat-label">Left</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-name">SG Property</span>
+      <span class="section-badge badge-property">Property</span>
+    </div>
+    <div id="property-list"></div>
+    <div class="add-area">
+      <input class="add-input" id="prop-input" type="text" placeholder="Add task..." onkeydown="if(event.key==='Enter')add('property')" />
+      <select class="add-select" id="prop-pri">
+        <option value="high">High</option>
+        <option value="med" selected>Med</option>
+        <option value="low">Low</option>
+      </select>
+      <button class="add-btn" onclick="add('property')">+ Add</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-name">Falcon Safe</span>
+      <span class="section-badge badge-falcon">Security</span>
+    </div>
+    <div id="falcon-list"></div>
+    <div class="add-area">
+      <input class="add-input" id="falcon-input" type="text" placeholder="Add task..." onkeydown="if(event.key==='Enter')add('falcon')" />
+      <select class="add-select" id="falcon-pri">
+        <option value="high">High</option>
+        <option value="med" selected>Med</option>
+        <option value="low">Low</option>
+      </select>
+      <button class="add-btn" onclick="add('falcon')">+ Add</button>
+    </div>
+  </div>
+
+  <div class="bottom-actions">
+    <button class="clear-btn" onclick="clearDone()">Clear completed tasks</button>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'darren_planner_v1';
+
+const defaults = {
+  property: [
+    {id:1, text:'Follow up new FB leads via WhatsApp', priority:'high', done:false},
+    {id:2, text:'Send ebook to pending leads', priority:'high', done:false},
+    {id:3, text:'Update pipeline stages in Lead Manager', priority:'med', done:false},
+    {id:4, text:'Prepare for zoom / meeting calls', priority:'med', done:false},
+    {id:5, text:'Post content on TikTok / XHS / Instagram', priority:'med', done:false},
+    {id:6, text:'Reply comments and DMs on social media', priority:'low', done:false},
+    {id:7, text:'Review ad performance in Ads Manager', priority:'low', done:false}
+  ],
+  falcon: [
+    {id:10, text:'Follow up pending quotations', priority:'high', done:false},
+    {id:11, text:'Check on ongoing installation jobs', priority:'high', done:false},
+    {id:12, text:'Reply customer enquiries', priority:'med', done:false},
+    {id:13, text:'Update job schedule and delivery dates', priority:'med', done:false},
+    {id:14, text:'Source new products and suppliers', priority:'low', done:false}
+  ]
+};
+
+let nextId = 100;
+
+function load() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(defaults));
+}
+
+function save(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+let data = load();
+
+function render(section) {
+  const list = document.getElementById(section + '-list');
+  list.innerHTML = '';
+  const sorted = [...data[section]].sort((a,b) => {
+    const order = {high:0, med:1, low:2};
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return order[a.priority] - order[b.priority];
+  });
+  sorted.forEach(task => {
+    const div = document.createElement('div');
+    div.className = 'task' + (task.done ? ' done' : '');
+    div.innerHTML = `
+      <div class="tick ${task.done ? 'checked' : ''}" onclick="toggle('${section}', ${task.id})"></div>
+      <div class="task-body" onclick="toggle('${section}', ${task.id})">
+        <div class="task-text">${task.text}</div>
+        <div class="task-tags"><span class="priority p-${task.priority}">${task.priority}</span></div>
+      </div>
+      <button class="del-btn" onclick="del('${section}', ${task.id})" title="Delete">&times;</button>
+    `;
+    list.appendChild(div);
+  });
+  updateStats();
+}
+
+function toggle(section, id) {
+  const t = data[section].find(t => t.id === id);
+  if (t) t.done = !t.done;
+  save(data);
+  render(section);
+}
+
+function del(section, id) {
+  data[section] = data[section].filter(t => t.id !== id);
+  save(data);
+  render(section);
+}
+
+function add(section) {
+  const inputId = section === 'property' ? 'prop-input' : 'falcon-input';
+  const priId = section === 'property' ? 'prop-pri' : 'falcon-pri';
+  const input = document.getElementById(inputId);
+  const text = input.value.trim();
+  if (!text) return;
+  const priority = document.getElementById(priId).value;
+  data[section].unshift({id: nextId++, text, priority, done: false});
+  input.value = '';
+  save(data);
+  render(section);
+}
+
+function clearDone() {
+  data.property = data.property.filter(t => !t.done);
+  data.falcon = data.falcon.filter(t => !t.done);
+  save(data);
+  render('property');
+  render('falcon');
+}
+
+function updateStats() {
+  const all = [...data.property, ...data.falcon];
+  const done = all.filter(t => t.done).length;
+  document.getElementById('statTotal').textContent = all.length;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statLeft').textContent = all.length - done;
+}
+
+function setDate() {
+  const d = new Date();
+  document.getElementById('todayChip').textContent = d.toLocaleDateString('en-SG', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+}
+
+setDate();
+render('property');
+render('falcon');
+</script>
+</body>
+</html>
