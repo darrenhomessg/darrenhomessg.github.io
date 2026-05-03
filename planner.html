@@ -58,6 +58,7 @@
   .section-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
   .badge-property { background: var(--property-bg); color: var(--property); }
   .badge-falcon { background: var(--falcon-bg); color: var(--falcon); }
+  .badge-personal { background: #EDE9FE; color: #5B21B6; }
 
   .task { display: flex; align-items: flex-start; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
   .task:last-of-type { border-bottom: none; }
@@ -154,6 +155,23 @@
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-head">
+      <span class="section-name">Personal</span>
+      <span class="section-badge badge-personal">Personal</span>
+    </div>
+    <div id="personal-list"></div>
+    <div class="add-area">
+      <input class="add-input" id="personal-input" type="text" placeholder="Add task..." onkeydown="if(event.key==='Enter')add('personal')" />
+      <select class="add-select" id="personal-pri">
+        <option value="high">High</option>
+        <option value="med" selected>Med</option>
+        <option value="low">Low</option>
+      </select>
+      <button class="add-btn" onclick="add('personal')">+ Add</button>
+    </div>
+  </div>
+
   <div class="bottom-actions">
     <button class="clear-btn" onclick="clearDone()">Clear completed tasks</button>
   </div>
@@ -179,6 +197,14 @@ const defaults = {
     {id:12, text:'Reply customer enquiries', priority:'med', done:false},
     {id:13, text:'Update job schedule and delivery dates', priority:'med', done:false},
     {id:14, text:'Source new products and suppliers', priority:'low', done:false}
+  ],
+  personal: [
+    {id:20, text:'Check bank account and transactions', priority:'high', done:false},
+    {id:21, text:'Review investment portfolio', priority:'med', done:false},
+    {id:22, text:'Book air tickets', priority:'med', done:false},
+    {id:23, text:'Plan holiday itinerary', priority:'low', done:false},
+    {id:24, text:'Pay bills and insurance', priority:'high', done:false},
+    {id:25, text:'Family errands', priority:'low', done:false}
   ]
 };
 
@@ -251,13 +277,15 @@ function add(section) {
 function clearDone() {
   data.property = data.property.filter(t => !t.done);
   data.falcon = data.falcon.filter(t => !t.done);
+  data.personal = data.personal.filter(t => !t.done);
   save(data);
   render('property');
   render('falcon');
+  render('personal');
 }
 
 function updateStats() {
-  const all = [...data.property, ...data.falcon];
+  const all = [...data.property, ...data.falcon, ...data.personal];
   const done = all.filter(t => t.done).length;
   document.getElementById('statTotal').textContent = all.length;
   document.getElementById('statDone').textContent = done;
@@ -272,6 +300,7 @@ function setDate() {
 setDate();
 render('property');
 render('falcon');
+render('personal');
 </script>
 </body>
 </html>
