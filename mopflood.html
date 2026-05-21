@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The MOP Flood Guide</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f7f7f7; color: #222; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px; }
+    h1 { margin-bottom: 6px; }
+    p { margin-top: 0; color: #555; }
+    .btn { display: inline-block; padding: 12px 18px; background: #111; color: #fff; text-decoration: none; border-radius: 8px; margin: 12px 0 20px; font-size: 15px; }
+    iframe { width: 100%; height: 85vh; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The MOP Flood Guide</h1>
+  <p>Thanks for requesting the guide. Read it below or open in a new tab.</p>
+  <a id="openPdf" class="btn" href="mopflood.pdf" target="_blank" rel="noopener">Open PDF in new tab</a>
+  <iframe id="pdfFrame" src="mopflood.pdf#toolbar=0&navpanes=0&scrollbar=1"></iframe>
+</div>
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsjmZmG_WPb9jN2ZnwtJccMXyEd4tIMgvcHgelKJSlDJkEL9zsW2C4hvDzIlfOsh5c/exec';
+const EBOOK_NAME = 'The MOP Flood Guide';
+const params = new URLSearchParams(window.location.search);
+const leadId = params.get('lead_id') || 'unknown';
+const sessionId = Date.now() + '-' + Math.random().toString(36).slice(2,10);
+
+function logEvent(ev, seconds) {
+  fetch(SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ event: ev, lead_id: leadId, ebook: EBOOK_NAME,
+      session_id: sessionId, seconds: seconds || 0,
+      page_url: window.location.href, user_agent: navigator.userAgent })
+  }).catch(()=>{});
+}
+
+logEvent('page_open');
+document.getElementById('openPdf').addEventListener('click', () => logEvent('ebook_click'));
+setInterval(() => { if (document.visibilityState === 'visible') logEvent('heartbeat', 15); }, 15000);
+document.addEventListener('visibilitychange', () => {
+  logEvent(document.visibilityState === 'hidden' ? 'page_hidden' : 'page_visible');
+});
+window.addEventListener('beforeunload', () => {
+  navigator.sendBeacon(SCRIPT_URL,
+    new Blob([JSON.stringify({ event: 'page_close', lead_id: leadId,
+      ebook: EBOOK_NAME, session_id: sessionId, seconds: 0,
+      page_url: window.location.href, user_agent: navigator.userAgent })],
+    { type: 'text/plain;charset=utf-8' }));
+});
+</script>
+</body>
+</html>
